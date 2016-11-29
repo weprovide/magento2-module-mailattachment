@@ -11,7 +11,7 @@ Extends TransportBuilder with attachment functionality
 
 ```php
 <?php
-namespace WeProvide\Example\Controller\Email;
+namespace YourNameSpace\YourModule\Controller\Email;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
