@@ -1,6 +1,7 @@
 {
     "name": "weprovide/magento2-module-mailattachment",
     "description": "Extends TransportBuilder with attachment functionality",
+    "type": "magento2-module",
     "authors": [
         {
             "email": "dwayne@weprovide.com",
