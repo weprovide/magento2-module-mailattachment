@@ -4,8 +4,8 @@
     "type": "magento2-module",
     "authors": [
         {
-            "email": "dwayne@weprovide.com",
-            "name": "Dwayne Hanekamp"
+            "email": "eric@weprovide.com",
+            "name": "Eric Claeren"
         }
     ],
     "license": "MIT",
