@@ -1,31 +1,29 @@
 <?php
-/**
- * Mail Template Transport Builder
- *
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
 declare(strict_types=1);
 
-namespace Magento\Framework\Mail\Template;
+namespace WeProvide\MailAttachment\Mail\Template;
 
 use Magento\Framework\App\TemplateTypesInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
+use Magento\Framework\Mail\AddressConverter;
 use Magento\Framework\Mail\EmailMessageInterface;
 use Magento\Framework\Mail\EmailMessageInterfaceFactory;
-use Magento\Framework\Mail\AddressConverter;
 use Magento\Framework\Mail\Exception\InvalidArgumentException;
 use Magento\Framework\Mail\MessageInterface;
 use Magento\Framework\Mail\MessageInterfaceFactory;
 use Magento\Framework\Mail\MimeInterface;
 use Magento\Framework\Mail\MimeMessageInterfaceFactory;
 use Magento\Framework\Mail\MimePartInterfaceFactory;
+use Magento\Framework\Mail\Template\FactoryInterface;
+use Magento\Framework\Mail\Template\SenderResolverInterface;
 use Magento\Framework\Mail\TemplateInterface;
 use Magento\Framework\Mail\TransportInterface;
 use Magento\Framework\Mail\TransportInterfaceFactory;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Phrase;
+use Zend\Mime\Mime;
+use Zend\Mime\PartFactory;
 
 /**
  * TransportBuilder
@@ -34,76 +32,8 @@ use Magento\Framework\Phrase;
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @since 100.0.2
  */
-class TransportBuilder
+class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
 {
-    /**
-     * Template Identifier
-     *
-     * @var string
-     */
-    protected $templateIdentifier;
-
-    /**
-     * Template Model
-     *
-     * @var string
-     */
-    protected $templateModel;
-
-    /**
-     * Template Variables
-     *
-     * @var array
-     */
-    protected $templateVars;
-
-    /**
-     * Template Options
-     *
-     * @var array
-     */
-    protected $templateOptions;
-
-    /**
-     * Mail Transport
-     *
-     * @var TransportInterface
-     */
-    protected $transport;
-
-    /**
-     * Template Factory
-     *
-     * @var FactoryInterface
-     */
-    protected $templateFactory;
-
-    /**
-     * Object Manager
-     *
-     * @var ObjectManagerInterface
-     */
-    protected $objectManager;
-
-    /**
-     * Message
-     *
-     * @var EmailMessageInterface
-     */
-    protected $message;
-
-    /**
-     * Sender resolver
-     *
-     * @var SenderResolverInterface
-     */
-    protected $_senderResolver;
-
-    /**
-     * @var TransportInterfaceFactory
-     */
-    protected $mailTransportFactory;
-
     /**
      * Param that used for storing all message data until it will be used
      *
@@ -130,6 +60,10 @@ class TransportBuilder
      * @var AddressConverter|null
      */
     private $addressConverter;
+
+    protected $attachments = [];
+
+    protected $partFactory;
 
     /**
      * TransportBuilder constructor
@@ -159,6 +93,7 @@ class TransportBuilder
         MimePartInterfaceFactory $mimePartInterfaceFactory = null,
         AddressConverter $addressConverter = null
     ) {
+        parent::__construct($templateFactory, $message, $senderResolver, $objectManager, $mailTransportFactory, $messageFactory, $emailMessageInterfaceFactory, $mimeMessageInterfaceFactory, $mimePartInterfaceFactory, $addressConverter);
         $this->templateFactory = $templateFactory;
         $this->objectManager = $objectManager;
         $this->_senderResolver = $senderResolver;
@@ -171,6 +106,7 @@ class TransportBuilder
             ->get(MimePartInterfaceFactory::class);
         $this->addressConverter = $addressConverter ?: $this->objectManager
             ->get(AddressConverter::class);
+        $this->partFactory = $objectManager->get(PartFactory::class);
     }
 
     /**
@@ -394,8 +330,9 @@ class TransportBuilder
                 );
         }
         $mimePart = $this->mimePartInterfaceFactory->create(['content' => $content]);
+        $parts = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
         $this->messageData['body'] = $this->mimeMessageInterfaceFactory->create(
-            ['parts' => [$mimePart]]
+            ['parts' => $parts]
         );
 
         $this->messageData['subject'] = html_entity_decode(
@@ -430,5 +367,24 @@ class TransportBuilder
                 $convertedAddressArray
             );
         }
+    }
+
+    /**
+     * @param string|null $content
+     * @param string|null $fileName
+     * @param string|null $fileType
+     * @return TransportBuilder
+     */
+    public function addAttachment(?string $content, ?string $fileName, ?string $fileType)
+    {
+        $attachmentPart = $this->partFactory->create();
+        $attachmentPart->setContent($content)
+            ->setType($fileType)
+            ->setFileName($fileName)
+            ->setDisposition(Mime::DISPOSITION_ATTACHMENT)
+            ->setEncoding(Mime::ENCODING_BASE64);
+        $this->attachments[] = $attachmentPart;
+
+        return $this;
     }
 }
