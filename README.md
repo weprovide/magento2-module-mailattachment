@@ -40,7 +40,7 @@ class Index extends Action
     public function execute()
     {
         // Any buffer
-        $body = '';
+        $content = '';
 
         $transport = $this->transportBuilder->setTemplateIdentifier('example_identifier')
                                             ->setTemplateOptions([
@@ -52,12 +52,7 @@ class Index extends Action
                                                 'email' => 'info@example.com',
                                             ])
                                             ->addTo('example@example.com')
-                                            ->addAttachment($body,
-                                                Zend_Mime::TYPE_OCTETSTREAM,
-                                                Zend_Mime::DISPOSITION_ATTACHMENT,
-                                                Zend_Mime::ENCODING_BASE64,
-                                                'document.pdf'
-                                            );
+                                            ->addAttachment($content, 'document.pdf', 'application/pdf');
         
         $transport = $transport->getTransport();
         $transport->sendMessage();
@@ -70,11 +65,9 @@ class Index extends Action
 ## Api
 
 `public function addAttachment(
-    $body,
-    $mimeType = Zend_Mime::TYPE_OCTETSTREAM,
-    $disposition = Zend_Mime::DISPOSITION_ATTACHMENT,
-    $encoding = Zend_Mime::ENCODING_BASE64,
-    $filename = null
+    $content,
+    $fileName = '',
+    $fileType = ''
 )`
 
 For reference also check [the code](Mail/Template/TransportBuilder.php)
