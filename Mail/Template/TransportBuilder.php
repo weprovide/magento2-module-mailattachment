@@ -107,27 +107,8 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
             // @see https://magento.stackexchange.com/questions/292760/unable-to-add-attachment-in-email-after-upgrade-to-magento-2-3-3-version
 
             $mimeMessage = $this->mimeMessageFactory->create();
-            /** @var Part $bodyPart */
-            $bodyPart = $this->partFactory->create(['content' => $this->message->getBody()]);
-            // Cannot inherit through $this->message. Default is utf-8.
-            $bodyPart->setCharset('utf-8');
-
-            // Re-used from prepare message, can be removed in 2.3.3.
-            // Because they are using parts by default. These interface type logic can be removed.
-            $template = $this->getTemplate();
-            switch ($template->getType()) {
-                case TemplateTypesInterface::TYPE_TEXT:
-                    $bodyPart->setType(Mime::TYPE_TEXT);
-                    $mimeMessage->setParts(array_merge([$bodyPart], $this->attachments));
-                    $this->message->setBodyText($mimeMessage);
-                    break;
-
-                case TemplateTypesInterface::TYPE_HTML:
-                    $bodyPart->setType(Mime::TYPE_HTML);
-                    $mimeMessage->setParts(array_merge([$bodyPart], $this->attachments));
-                    $this->message->setBodyHtml($mimeMessage);
-                    break;
-            }
+            $mimeMessage->setParts(array_merge($this->message->getBody()->getParts(), $this->attachments));
+            $this->message->setBody($mimeMessage);
         }
     }
 
