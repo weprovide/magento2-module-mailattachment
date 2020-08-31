@@ -2,10 +2,15 @@
     "name": "weprovide/magento2-module-mailattachment",
     "description": "Extends TransportBuilder with attachment functionality",
     "type": "magento2-module",
+    "version": "2.1.2",
     "authors": [
         {
             "email": "sander@weprovide.com",
             "name": "Sander Hartman"
+        },
+        {
+            "email": "mischa@weprovide.com",
+            "name": "Mischa Braam"
         }
     ],
     "license": "MIT",

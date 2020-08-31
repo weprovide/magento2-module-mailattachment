@@ -358,15 +358,14 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
     {
         if (is_string($email)) {
             $this->messageData[$addressType][] = $this->addressConverter->convert($email, $name);
+
             return;
         }
+
         $convertedAddressArray = $this->addressConverter->convertMany($email);
-        if (isset($this->messageData[$addressType])) {
-            $this->messageData[$addressType] = array_merge(
-                $this->messageData[$addressType],
-                $convertedAddressArray
-            );
-        }
+        $this->messageData[$addressType] = array_merge($this->messageData[$addressType] ?? [], $convertedAddressArray);
+
+        return $this;
     }
 
     /**
