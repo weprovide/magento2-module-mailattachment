@@ -314,6 +314,8 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
     protected function prepareMessage()
     {
         $template = $this->getTemplate();
+        $content  = $template->processTemplate();
+
         $mimeType = null;
         switch ($template->getType()) {
             case TemplateTypesInterface::TYPE_TEXT:
@@ -330,7 +332,6 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
                 );
         }
 
-        $content                   = $template->processTemplate();
         $mimePart                  = $this->mimePartInterfaceFactory->create(['content' => $content, 'type' => $mimeType]);
         $parts                     = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
         $this->messageData['body'] = $this->mimeMessageInterfaceFactory->create(
