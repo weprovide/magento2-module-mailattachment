@@ -314,14 +314,14 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
     protected function prepareMessage()
     {
         $template = $this->getTemplate();
-        $content = $template->processTemplate();
+        $mimeType = null;
         switch ($template->getType()) {
             case TemplateTypesInterface::TYPE_TEXT:
-                $part['type'] = MimeInterface::TYPE_TEXT;
+                $mimeType = MimeInterface::TYPE_TEXT;
                 break;
 
             case TemplateTypesInterface::TYPE_HTML:
-                $part['type'] = MimeInterface::TYPE_HTML;
+                $mimeType = MimeInterface::TYPE_HTML;
                 break;
 
             default:
@@ -329,8 +329,10 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
                     new Phrase('Unknown template type')
                 );
         }
-        $mimePart = $this->mimePartInterfaceFactory->create(['content' => $content]);
-        $parts = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
+
+        $content                   = $template->processTemplate();
+        $mimePart                  = $this->mimePartInterfaceFactory->create(['content' => $content, 'type' => $mimeType]);
+        $parts                     = count($this->attachments) ? array_merge([$mimePart], $this->attachments) : [$mimePart];
         $this->messageData['body'] = $this->mimeMessageInterfaceFactory->create(
             ['parts' => $parts]
         );
